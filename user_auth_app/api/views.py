@@ -11,7 +11,7 @@ from .serializers import RegistrationSerializer, CustomAuthTokenSerializer
 class RegistrationView(APIView):
     permission_classes = [AllowAny]
     serializer_class = CustomAuthTokenSerializer
-    
+
     def post(self, request):
         serializer = RegistrationSerializer(data=request.data)
 
@@ -26,10 +26,11 @@ class RegistrationView(APIView):
             return Response(data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
- 
- 
+
+
 class CustomLoginView(ObtainAuthToken):
     permission_classes = [AllowAny]
+    serializer_class = CustomAuthTokenSerializer
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
@@ -42,7 +43,6 @@ class CustomLoginView(ObtainAuthToken):
                 'username': user.username,
                 'email': user.email
             }
+            return Response(data, status=status.HTTP_200_OK)
         else:
-            data = serializer.errors
-
-        return Response(data)
+           return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
