@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
 	'corsheaders',
-    'application_app',
+    'application_app.apps.ApplicationAppConfig',
 ]
 
 MIDDLEWARE = [
