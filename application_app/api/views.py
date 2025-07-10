@@ -1,6 +1,7 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied, NotFound
 
 from ..models import (
     Company,
@@ -27,14 +28,34 @@ class ContactViewSet(viewsets.ModelViewSet):
 
 
 class ApplicationViewSet(viewsets.ModelViewSet):
-    queryset = Application.objects.prefetch_related(
-        'notes').select_related('company', 'contact').all()
     serializer_class = ApplicationSerializer
-    
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        return Application.objects.filter(user=self.request.user).prefetch_related(
+            'notes').select_related('company', 'contact')
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
 
 class NoteViewSet(viewsets.ModelViewSet):
-    queryset = Note.objects.all()
     serializer_class = NoteSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        application_id = self.request.data.get('application')
+        if not application_id:
+            raise NotFound(detail="Application ID wurde nicht im Request gefunden.")
+
+        try:
+            # Finde die zugehörige Bewerbung und prüfe die Eigentümerschaft
+            application_instance = Application.objects.get(id=application_id, user=self.request.user)
+        except Application.DoesNotExist:
+            # Wenn die Bewerbung nicht existiert ODER dem User nicht gehört, verweigere den Zugriff.
+            raise PermissionDenied("Sie haben keine Berechtigung, eine Notiz zu dieser Bewerbung hinzuzufügen.")
+        
+        # Speichere die Notiz und übergebe die korrekte 'application'-Instanz.
+        serializer.save(application=application_instance)
