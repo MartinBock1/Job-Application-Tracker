@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils import timezone
-
+from django.contrib.auth.models import User
 # Create your models here.
 
 
@@ -67,6 +67,15 @@ class Contact(models.Model):
 
 
 class Application(models.Model):
+    user = models.ForeignKey(
+    User,
+    on_delete=models.CASCADE,
+    related_name='applications',
+    verbose_name="Benutzer",
+    # null=True, # Vorübergehend hinzufügen
+    # blank=True
+)
+    
     STATUS_CHOICES = [
         ('DRAFT', 'Entwurf'),
         ('APPLIED', 'Beworben'),
