@@ -25,10 +25,18 @@ class ApplicationAPITests(APITestCase):
         self.user = User.objects.create_user(username='testuser', password='password123')
         
         self.company1 = Company.objects.create(
-            name="TechSolutions GmbH", website="https://tech.sol")
-        self.company2 = Company.objects.create(name="Innovate AG", website="https://innovate.ag")
+            user=self.user,
+            name="TechSolutions GmbH", 
+            website="https://tech.sol"
+        )
+        self.company2 = Company.objects.create(
+            user=self.user,
+            name="Innovate AG", 
+            website="https://innovate.ag"
+        )
 
         self.contact1 = Contact.objects.create(
+            user=self.user,
             company=self.company1,
             first_name="Erika",
             last_name="Musterfrau",
@@ -36,6 +44,7 @@ class ApplicationAPITests(APITestCase):
         )
 
         self.application1 = Application.objects.create(
+            user=self.user,
             job_title="Senior Python Developer",
             company=self.company1,
             contact=self.contact1,
@@ -44,12 +53,14 @@ class ApplicationAPITests(APITestCase):
             salary_expectation=80000
         )
 
+        # Note hat kein direktes user-Feld, ist aber über die Application verknüpft
         self.note1 = Note.objects.create(
             application=self.application1,
             text="Erstes Telefoninterview war sehr positiv."
         )
 
         self.application2 = Application.objects.create(
+            user=self.user,
             job_title="Frontend Entwickler",
             company=self.company2,
             status='DRAFT'
@@ -102,6 +113,36 @@ class ApplicationAPITests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
+    # === PERMISSION Tests ===
+    def test_user_cannot_access_other_users_applications(self):
+        # Erstelle einen zweiten Benutzer und eine Bewerbung für diesen
+        other_user = User.objects.create_user(username='otheruser', password='password123')
+        other_company = Company.objects.create(user=other_user, name="Andere Firma")
+        other_application = Application.objects.create(
+            user=other_user,
+            job_title="Job bei anderer Firma",
+            company=other_company,
+            status='APPLIED'
+        )
+
+        # Authentifiziere als der ursprüngliche Benutzer 'testuser'
+        self.client.force_authenticate(user=self.user)
+
+        # 1. Test der Listenansicht: Es dürfen nur die eigenen Bewerbungen erscheinen
+        list_url = reverse('application-list')
+        response = self.client.get(list_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # Es sollten nur 2 Bewerbungen von 'testuser' sein, nicht 3
+        self.assertEqual(len(response.data), 2) 
+        application_ids = [app['id'] for app in response.data]
+        self.assertNotIn(other_application.id, application_ids)
+
+        # 2. Test der Detailansicht: Zugriff auf fremde Bewerbung muss fehlschlagen
+        detail_url = reverse('application-detail', kwargs={'pk': other_application.pk})
+        response = self.client.get(detail_url)
+        # Erwartet wird 404, da die Query für den User kein Ergebnis liefert
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        
     # === CREATE Tests (POST) ===
     def test_create_application(self):
         self.client.force_authenticate(user=self.user)
@@ -200,6 +241,65 @@ class ApplicationAPITests(APITestCase):
 
      # === DELETE Tests (DELETE) ===
 
+    # === NESTED RESOURCE Tests (Notes) ===
+    def test_update_application_with_nested_notes(self):
+        self.client.force_authenticate(user=self.user)
+        url = reverse('application-detail', kwargs={'pk': self.application1.pk})
+
+        # Szenario: Eine Notiz ändern, eine neue hinzufügen, eine alte bleibt unberührt
+        update_data = {
+            "job_title": self.application1.job_title, # Pflichtfeld bei PUT
+            "company_id": self.application1.company.id, # Pflichtfeld bei PUT
+            "status": self.application1.status, # Pflichtfeld bei PUT
+            "notes": [
+                {
+                    "id": self.note1.id,
+                    "text": "Das erste Interview war doch nicht so positiv." # Text ändern
+                },
+                {
+                    "text": "Neue Notiz: Rückmeldung für 28.11. versprochen." # Neue Notiz hinzufügen
+                }
+            ]
+        }
+        
+        response = self.client.put(url, update_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        self.application1.refresh_from_db()
+        self.note1.refresh_from_db()
+
+        self.assertEqual(self.application1.notes.count(), 2)
+        self.assertEqual(self.note1.text, "Das erste Interview war doch nicht so positiv.")
+        # Prüfen, ob die neue Notiz existiert
+        self.assertTrue(self.application1.notes.filter(text__startswith="Neue Notiz").exists())
+
+    def test_update_application_deletes_nested_note(self):
+        self.client.force_authenticate(user=self.user)
+        url = reverse('application-detail', kwargs={'pk': self.application1.pk})
+        
+        # Erstelle eine zweite Notiz zum Löschen
+        Note.objects.create(application=self.application1, text="Diese Notiz wird gelöscht.")
+        self.assertEqual(self.application1.notes.count(), 2)
+
+        update_data = {
+            "job_title": self.application1.job_title,
+            "company_id": self.application1.company.id,
+            "status": self.application1.status,
+            "notes": [
+                {
+                    "id": self.note1.id, # Nur die erste Notiz wird mitgesendet
+                    "text": self.note1.text
+                }
+            ]
+        }
+
+        response = self.client.put(url, update_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        self.application1.refresh_from_db()
+        self.assertEqual(self.application1.notes.count(), 1)
+        self.assertEqual(self.application1.notes.first().id, self.note1.id)
+
     def test_delete_application(self):
         self.client.force_authenticate(user=self.user)
         url = reverse('application-detail', kwargs={'pk': self.application1.pk})
@@ -215,8 +315,8 @@ class ApplicationAPITests(APITestCase):
 
     def test_update_non_existent_application_returns_404(self):
         self.client.force_authenticate(user=self.user)
-        last_app_id = Application.objects.last().id if Application.objects.exists() else 0
-        non_existent_pk = last_app_id + 100
+        # Eine ID, die sicher nicht existiert
+        non_existent_pk = Application.objects.latest('id').id + 100
         
         url = reverse('application-detail', kwargs={'pk': non_existent_pk})
         
@@ -227,3 +327,4 @@ class ApplicationAPITests(APITestCase):
         }
         
         response = self.client.put(url, update_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

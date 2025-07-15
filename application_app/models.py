@@ -1,10 +1,16 @@
 from django.db import models
-from django.utils import timezone
 from django.contrib.auth.models import User
+from django.utils import timezone
 # Create your models here.
 
 
 class Company(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
     name = models.CharField(
         max_length=200,
         unique=True,
@@ -30,28 +36,40 @@ class Company(models.Model):
 
 
 class Contact(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+    
     company = models.ForeignKey(
         Company,
         related_name='contacts',
         on_delete=models.CASCADE,
         verbose_name="Unternehmen"
     )
+    
     first_name = models.CharField(
         max_length=100,
         verbose_name="Vorname"
     )
+    
     last_name = models.CharField(
         max_length=100,
         verbose_name="Nachname"
     )
+    
     email = models.EmailField(
         blank=True
     )
+    
     phone = models.CharField(
         max_length=50,
         blank=True,
         verbose_name="Telefon"
     )
+    
     position = models.CharField(
         max_length=100,
         blank=True,
@@ -68,14 +86,12 @@ class Contact(models.Model):
 
 class Application(models.Model):
     user = models.ForeignKey(
-    User,
-    on_delete=models.CASCADE,
-    related_name='applications',
-    verbose_name="Benutzer",
-    # null=True, # Vorübergehend hinzufügen
-    # blank=True
-)
-    
+        User,
+        on_delete=models.CASCADE,
+        related_name='applications',
+        verbose_name="Benutzer",
+    )
+
     STATUS_CHOICES = [
         ('DRAFT', 'Entwurf'),
         ('APPLIED', 'Beworben'),
@@ -89,12 +105,14 @@ class Application(models.Model):
         max_length=255,
         verbose_name="Jobtitel"
     )
+    
     company = models.ForeignKey(
         Company,
         related_name='applications',
         on_delete=models.CASCADE,
         verbose_name="Unternehmen"
     )
+    
     contact = models.ForeignKey(
         Contact,
         related_name='applications',
@@ -110,10 +128,29 @@ class Application(models.Model):
         default='DRAFT',
         verbose_name="Status"
     )
+
     applied_on = models.DateField(
         null=True,
         blank=True,
         verbose_name="Beworben am"
+    )
+
+    interview_on = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name="Interview am"
+    )
+
+    offer_on = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name="Angebot erhalten am"
+    )
+
+    rejected_on = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name="Absage erhalten am"
     )
 
     follow_up_on = models.DateField(
@@ -127,6 +164,7 @@ class Application(models.Model):
         blank=True,
         verbose_name="Link zur Ausschreibung"
     )
+
     salary_expectation = models.PositiveIntegerField(
         null=True,
         blank=True,
@@ -138,6 +176,7 @@ class Application(models.Model):
         auto_now_add=True,
         verbose_name="Erstellt am"
     )
+
     updated_at = models.DateTimeField(
         auto_now=True,
         verbose_name="Aktualisiert am"
@@ -158,6 +197,7 @@ class Note(models.Model):
         on_delete=models.CASCADE,
         verbose_name="Bewerbung"
     )
+    
     text = models.TextField(verbose_name="Notiztext")
     created_at = models.DateTimeField(
         auto_now_add=True,

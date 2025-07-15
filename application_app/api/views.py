@@ -20,11 +20,27 @@ from .serializers import (
 class CompanyViewSet(viewsets.ModelViewSet):
     queryset = Company.objects.all().order_by('name')
     serializer_class = CompanySerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        return self.queryset.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 
 class ContactViewSet(viewsets.ModelViewSet):
     queryset = Contact.objects.all()
     serializer_class = ContactSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        return self.queryset.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 
 class ApplicationViewSet(viewsets.ModelViewSet):
@@ -44,6 +60,10 @@ class NoteViewSet(viewsets.ModelViewSet):
     serializer_class = NoteSerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return Note.objects.filter(application__user=user)
 
     def perform_create(self, serializer):
         application_id = self.request.data.get('application')
