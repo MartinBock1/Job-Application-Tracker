@@ -52,6 +52,12 @@ class ApplicationViewSet(viewsets.ModelViewSet):
         return Application.objects.filter(user=self.request.user).prefetch_related(
             'notes').select_related('company', 'contact')
     
+    def get_serializer_context(self):
+        """
+        Stellt sicher, dass der Serializer Zugriff auf das request-Objekt hat.
+        """
+        return {'request': self.request}
+    
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 

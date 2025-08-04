@@ -6,6 +6,7 @@ class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
         fields = ['id', 'name', 'website', 'industry']
+        read_only_fields = ['user']
 
 
 class ContactSerializer(serializers.ModelSerializer):
@@ -29,11 +30,12 @@ class ContactSerializer(serializers.ModelSerializer):
 
 
 class NoteSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(required=False)
+    id = serializers.IntegerField(required=False, allow_null=True)
 
     class Meta:
         model = Note
         fields = ['id', 'text', 'created_at']
+        read_only_fields = ['created_at']
 
 
 class ApplicationSerializer(serializers.ModelSerializer):
@@ -45,7 +47,7 @@ class ApplicationSerializer(serializers.ModelSerializer):
 
     # Schreib-Felder (für create/update)
     company_id = serializers.PrimaryKeyRelatedField(
-        queryset=Company.objects.all(),
+        queryset=Company.objects.none(),
         source='company',
         write_only=True
     )
@@ -59,6 +61,16 @@ class ApplicationSerializer(serializers.ModelSerializer):
 
     # Optionales Feld für das Datum
     applied_on = serializers.DateField(required=False, allow_null=True)
+
+    def __init__(self, *args, **kwargs):
+        """
+        Filtere das company_id Queryset basierend auf dem aktuellen Benutzer.
+        """
+        super().__init__(*args, **kwargs)
+        request = self.context.get('request', None)
+        if request and hasattr(request, 'user'):
+            user = request.user
+            self.fields['company_id'].queryset = Company.objects.filter(user=user)
 
     class Meta:
         model = Application
