@@ -47,7 +47,7 @@ class ApplicationSerializer(serializers.ModelSerializer):
 
     # Schreib-Felder (für create/update)
     company_id = serializers.PrimaryKeyRelatedField(
-        queryset=Company.objects.none(),
+        queryset=Company.objects.none(), # Queryset wird dynamisch in __init__ gesetzt
         source='company',
         write_only=True
     )
@@ -64,14 +64,16 @@ class ApplicationSerializer(serializers.ModelSerializer):
 
     def __init__(self, *args, **kwargs):
         """
-        Filtere das company_id Queryset basierend auf dem aktuellen Benutzer.
+        Filtert die Querysets für company_id und contact_id basierend auf dem User.
         """
         super().__init__(*args, **kwargs)
         request = self.context.get('request', None)
         if request and hasattr(request, 'user'):
             user = request.user
             self.fields['company_id'].queryset = Company.objects.filter(user=user)
-
+            self.fields['contact_id'].queryset = Contact.objects.filter(user=user)
+            
+            
     class Meta:
         model = Application
         fields = [

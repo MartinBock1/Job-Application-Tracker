@@ -13,7 +13,6 @@ class Company(models.Model):
     )
     name = models.CharField(
         max_length=200,
-        unique=True,
         verbose_name="Name des Unternehmens"
     )
     website = models.URLField(
@@ -30,6 +29,7 @@ class Company(models.Model):
     class Meta:
         verbose_name = "Unternehmen"
         verbose_name_plural = "Unternehmen"
+        unique_together = ('user', 'name')
 
     def __str__(self):
         return self.name
