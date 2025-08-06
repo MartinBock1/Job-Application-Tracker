@@ -39,25 +39,6 @@ class ContactAdmin(admin.ModelAdmin):
     list_filter = ('company',)
     search_fields = ('first_name', 'last_name', 'email', 'company__name')
 
-# @admin.register(Application)
-# class ApplicationAdmin(admin.ModelAdmin):
-#     # Wir definieren nur die Felder, die wir sehen wollen.
-#     # Wichtig: 'readonly_fields' werden hier NICHT aufgeführt.
-#     fields = (
-#         'user',
-#         'job_title',
-#         'company',
-#         'contact',
-#         'status',
-#         'applied_on',
-#         'follow_up_on',
-#         'job_posting_link',
-#         'salary_expectation'
-#     )
-
-#     # readonly_fields werden separat definiert.
-#     readonly_fields = ('created_at', 'updated_at')
-
 
 @admin.register(Application)
 class ApplicationAdmin(admin.ModelAdmin):
