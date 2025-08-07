@@ -1,0 +1,127 @@
+# 🚀 Job Application Tracker API
+
+![Django](https://img.shields.io/badge/Django-5.2-blue?logo=django&logoColor=white)![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python&logoColor=white)![License](https://img.shields.io/badge/License-MIT-green)![API Docs](https://img.shields.io/badge/API_Docs-Swagger_UI_&_ReDoc-informational)
+
+This is the backend for the **Job Application Tracker**, a robust API built with **Django** and the **Django REST Framework**. It serves as the central interface for managing job applications, companies, contacts, and notes.
+
+## ✨ Key Features
+
+-   **Token-based Authentication:** Secure user registration and login (email/password) using DRF's built-in Token Authentication.
+-   **Comprehensive CRUD Operations:** Full management of:
+    -   **Applications**
+    -   **Companies**
+    -   **Contacts**
+    -   **Notes**
+-   **Data Isolation:** Users can only access and manipulate their own data. All API endpoints are automatically filtered by the currently authenticated user.
+-   **Smart Nested Data Handling:** Notes can be created, updated, or deleted directly when updating an application in a single request.
+-   **Auto-Generated API Documentation:** Thanks to `drf-spectacular`, interactive Swagger UI and ReDoc documentation are generated automatically.
+-   **Admin Interface:** A full-featured Django Admin panel for easy data management and review.
+
+---
+
+## 📚 API Documentation
+
+The API documentation is generated automatically and is the best way to explore all available endpoints and their schemas. After starting the server, the documentation is available at the following URLs:
+
+-   **Swagger UI:** `http://127.0.0.1:8000/api/docs/`
+-   **ReDoc:** `http://127.0.0.1:8000/api/redoc/`
+-   **Schema File:** `http://127.0.0.1:8000/api/schema/`
+
+---
+
+## 🛠️ Tech Stack
+
+-   **Backend:** Django, Django REST Framework
+-   **Database:** SQLite3 (for development), easily switchable to PostgreSQL for production.
+-   **API Documentation:** drf-spectacular
+-   **CORS Handling:** django-cors-headers
+
+---
+
+## ⚙️ Setup & Installation
+
+Follow these steps to set up and run the project locally.
+
+### 1. Prerequisites
+
+-   Python 3.10+
+-   Git
+
+### 2. Clone the Project
+
+```bash
+git clone <REPOSITORY-LINK>
+cd <projectfolder>
+```
+
+### 3. Create and Activate a Virtual Environment
+
+It is highly recommended to use a virtual environment.
+
+```bash
+# Create the virtual environment
+python -m venv env
+
+# Activate on Windows
+.\env\Scripts\activate
+
+# Activate on macOS/Linux
+source env/bin/activate
+```
+
+### 4. Install Dependencies
+
+First, create a `requirements.txt` file (if it doesn't exist), then install the packages.
+
+```bash
+# If you don't have a requirements.txt file, create one
+pip freeze > requirements.txt
+
+# Install all packages from the requirements file
+pip install -r requirements.txt
+```
+
+### 5. Migrate the Database
+
+This command creates the necessary database tables based on the project's models.
+
+```bash
+python manage.py migrate
+```
+
+### 6. Create a Superuser
+
+A superuser is required to access the Django Admin panel.
+
+```bash
+python manage.py createsuperuser
+```
+Follow the prompts to set a username, email, and password.
+
+### 7. Start the Development Server
+
+```bash
+python manage.py runserver
+```
+
+The backend is now running and accessible at `http://127.0.0.1:8000`.
+
+---
+
+## 🗺️ API Endpoints Overview
+
+All endpoints require Token Authentication, except for those under `/api/auth/`.
+
+| Resource     | URL Prefix                  | Supported Methods                               |
+|--------------|-----------------------------|-------------------------------------------------|
+| **Auth**     | `/api/auth/`                | `POST` (`/registration/`, `/login/`)            |
+| **Companies**| `/api/companies/`           | `GET`, `POST`, `PUT`, `PATCH`, `DELETE`         |
+| **Contacts** | `/api/contacts/`            | `GET`, `POST`, `PUT`, `PATCH`, `DELETE`         |
+| **Applications**| `/api/applications/`    | `GET`, `POST`, `PUT`, `PATCH`, `DELETE`         |
+| **Notes**    | `/api/notes/`               | `GET`, `POST`, `PUT`, `PATCH`, `DELETE`         |
+
+---
+
+## 📜 License
+
+This project is licensed under the MIT License. See the `LICENSE` file for more details.
