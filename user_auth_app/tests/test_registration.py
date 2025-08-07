@@ -77,7 +77,7 @@ class RegistrationTests(APITestCase):
         # not a list containing the string.
         # Therefore, we compare the value directly.
         self.assertIn('error', response.data)
-        self.assertEqual(response.data['error'], 'dont`t match')
+        self.assertEqual(response.data['error'], 'Passwords don\'t match')
 
         # Verify that no user was created in the database
         user_exists = User.objects.filter(email='mismatch@example.com').exists()
