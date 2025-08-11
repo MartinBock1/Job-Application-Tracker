@@ -1,4 +1,7 @@
+from import_export import resources
 from django.contrib import admin
+from import_export.admin import ImportExportModelAdmin
+
 from .models import Company, Contact, Application, Note
 
 
@@ -55,8 +58,13 @@ class UserFilter(admin.SimpleListFilter):
             return queryset.filter(user__isnull=False)
 
 
+class ApplicationResource(resources.ModelResource):
+    
+    class Meta:
+        model = Application
+
 @admin.register(Company)
-class CompanyAdmin(admin.ModelAdmin):
+class CompanyAdmin(ImportExportModelAdmin):
     """
     Admin interface configuration for Company model.
     
@@ -71,7 +79,7 @@ class CompanyAdmin(admin.ModelAdmin):
 
 
 @admin.register(Contact)
-class ContactAdmin(admin.ModelAdmin):
+class ContactAdmin(ImportExportModelAdmin):
     """
     Admin interface configuration for Contact model.
     
@@ -88,7 +96,7 @@ class ContactAdmin(admin.ModelAdmin):
 
 
 @admin.register(Application)
-class ApplicationAdmin(admin.ModelAdmin):
+class ApplicationAdmin(ImportExportModelAdmin):
     """
     Admin interface configuration for Application model.
     
@@ -135,7 +143,7 @@ class ApplicationAdmin(admin.ModelAdmin):
 
 
 @admin.register(Note)
-class NoteAdmin(admin.ModelAdmin):
+class NoteAdmin(ImportExportModelAdmin):
     """
     Admin interface configuration for Note model.
     
