@@ -26,7 +26,12 @@ SECRET_KEY = 'django-insecure-hcv+ncgsw8me_oy@&n95cxz@wc1b!rm&jy0z8%z%38jc)$vozh
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '130.211.65.170',
+    'server-tracker.martin-bock.info',
+]
 
 
 # Application definition
@@ -40,9 +45,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
-	'corsheaders',
+    'corsheaders',
     'drf_spectacular',
     'import_export',
+    'user_auth_app.apps.UserAuthAppConfig',
     'application_app.apps.ApplicationAppConfig',
 ]
 
@@ -139,6 +145,7 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:5500',
     'http://127.0.0.1:4200',
     'http://localhost:4200',
+    'https://www.application-tracker.martin-bock.info',
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -146,18 +153,19 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:5500',
     'http://127.0.0.1:4200',
     'http://localhost:4200',
+    'https://www.application-tracker.martin-bock.info',
 ]
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
     ],
-    
+
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
     ],
-    
-     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 SPECTACULAR_SETTINGS = {
