@@ -29,7 +29,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    '130.211.65.170',
+    '34.76.116.155',
     'server-tracker.martin-bock.info',
 ]
 
