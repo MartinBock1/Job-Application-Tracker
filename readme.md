@@ -1,7 +1,23 @@
+Of course! Adding a reference to the frontend is an excellent idea to make the project documentation complete.
+
+Here is your updated `README.md` file with a new section for the frontend, placed right after the introduction for high visibility.
+
+---
+
 # 🚀 Job Application Tracker API
 DjangoPythonLicenseAPI Docs
 
 This is the backend for the Job Application Tracker, a robust API built with Django and the Django REST Framework. It serves as the central interface for managing job applications, companies, contacts, and notes.
+
+## 🌐 Frontend Application
+The official frontend for this API is a modern single-page application built with Angular. You can find the complete project and setup instructions in its dedicated repository:
+
+*   **Frontend Repository**: [https://github.com/MartinBock1/application-tracker-fe](https://github.com/MartinBock1/application-tracker-fe)
+
+To clone the frontend project, use the following command:
+```bash
+git clone https://github.com/MartinBock1/application-tracker-fe.git
+```
 
 ## ✨ Key Features
 *   **Token-based Authentication**: Secure user registration and login (email/password) using DRF's built-in Token Authentication.
