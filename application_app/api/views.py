@@ -69,10 +69,13 @@ class ContactViewSet(viewsets.ModelViewSet):
         """
         queryset = self.queryset.filter(user=self.request.user)
         company_id = self.request.query_params.get('company_id')
-        
-        if company_id is not None:
-            queryset = queryset.filter(company_id=company_id)
-            
+
+        if company_id:
+            try:
+                queryset = queryset.filter(company_id=int(company_id))
+            except (ValueError, TypeError):
+                pass
+
         return queryset
 
     def perform_create(self, serializer):
