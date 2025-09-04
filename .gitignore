@@ -1,8 +1,11 @@
 # Created by https://www.toptal.com/developers/gitignore/api/python,django
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,django
 
-# Ignoriere den generierten Ordner für statische Dateien
+# Ignore the generated folder for static files
 /static/staticfiles/
+
+# Copilot Instructions
+/.github
 
 ### Django ###
 *.log
